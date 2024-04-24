@@ -1,3 +1,4 @@
+## --- NOT WORKING ---
 # OTP Login & Registration WordPress Plugin
 ## Version: 1.3
 
