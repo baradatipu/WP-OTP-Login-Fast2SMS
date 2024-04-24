@@ -169,18 +169,13 @@ function otp_registration_form_shortcode() {
         $mobile_number = $_POST['mobile_number'];
         $otp = mt_rand(100000, 999999); // Generate a 6-digit OTP
 
-        // Check if the mobile number is already registered
-        $user_exists = get_user_by('phone', $mobile_number);
-        if ($user_exists) {
-            echo 'Mobile number already registered.';
-            return;
-        }
-
-        send_otp_via_sms($mobile_number, $otp);
-
+        // Store OTP in session
         $_SESSION['otp_register_mobile_number'] = $mobile_number;
         $_SESSION['otp_register_username'] = $username;
         $_SESSION['otp_register_otp'] = $otp;
+
+        // Send OTP via SMS
+        send_otp_via_sms($mobile_number, $otp);
 
         echo '<div class="otp-form">
                 <h2>OTP Registration</h2>
@@ -192,10 +187,15 @@ function otp_registration_form_shortcode() {
     } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['otp_register_submit'])) {
         $otp_entered = $_POST['otp'];
         $mobile_number = $_SESSION['otp_register_mobile_number'];
-        $username = $_SESSION['otp_register_username'];
-        $otp_sent = $_SESSION['otp_register_otp'];
+        $otp_stored = $_SESSION['otp_register_otp'];
 
-        if ($otp_entered == $otp_sent) {
+        if ($otp_entered == $otp_stored) {
+            // OTP verified, proceed with registration
+            // Clear session variables
+            unset($_SESSION['otp_register_mobile_number']);
+            unset($_SESSION['otp_register_username']);
+            unset($_SESSION['otp_register_otp']);
+
             // Register the user
             $userdata = array(
                 'user_login'  =>  $username,
